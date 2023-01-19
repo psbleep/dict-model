@@ -82,7 +82,7 @@ class DictModel(UserDict):
 
 
     from django.db import models
-    from dict_model import DictModel, dict_model
+    from dict_model import DictModel, dict_model_field
 
     class ExampleDictModel(DictModel):
         object_data = {
@@ -98,7 +98,7 @@ class DictModel(UserDict):
         )
 
         @property
-        @dict_model(ExampleDictModel)
+        @dict_model_field(ExampleDictModel)
         def example_dict_model(self):
             pass
 
@@ -131,9 +131,11 @@ class DictModel(UserDict):
 
     >>> ExampleDictModel.objects.first()
     ExampleDictModel(id=1, related=None, name='a', first=True)
-
     >>> ExampleDictModel.objects.get(id=2)
     ExampleDictModel(id=2, related=None, name='b', first=False)
+    >>> # Chain query methods like the Django ORM
+    >>> ExampleDictModel.objects.filter(first=False).count()
+    2
     """
     class ValidationError(Exception):
         pass
@@ -210,7 +212,7 @@ class DictModel(UserDict):
         return DictModelQueryset([cls(id) for id in cls.object_data.keys()])
 
 
-def dict_model(dict_model_cls: Type[DictModel], field_name: Optional[str] = None):
+def dict_model_field(dict_model_cls: Type[DictModel], field_name: Optional[str] = None):
     def dict_model_wrapper(func):
         @functools.wraps(func)
         def dict_model_inner(obj: Any):

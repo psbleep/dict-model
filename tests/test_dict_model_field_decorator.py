@@ -1,4 +1,4 @@
-from dict_model import DictModel, dict_model
+from dict_model import DictModel, dict_model_field
 
 
 class Example(DictModel):
@@ -10,7 +10,7 @@ class Model:
         self.example_id = example_id
 
     @property
-    @dict_model(Example)
+    @dict_model_field(Example)
     def example(self):
         pass
 
@@ -31,7 +31,7 @@ def test_dict_model_decorator_accepts_custom_id_field_name():
             self.custom_id = custom_id
 
         @property
-        @dict_model(Example, field_name="custom_id")
+        @dict_model_field(Example, field_name="custom_id")
         def example(self):
             pass
 
