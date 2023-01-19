@@ -14,6 +14,7 @@ class DictModelQueryset(UserList):
     """Collection of `DictModel` objects, providing a Django ORM query-style
     interface.
     """
+
     class NoResultFound(Exception):
         pass
 
@@ -137,6 +138,7 @@ class DictModel(UserDict):
     >>> ExampleDictModel.objects.filter(first=False).count()
     2
     """
+
     class ValidationError(Exception):
         pass
 
