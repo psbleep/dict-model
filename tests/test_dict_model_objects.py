@@ -1,6 +1,6 @@
 import pytest
 
-from dict_model import DictModel, DictModelObjects
+from dict_model import DictModel, DictModelQueryset
 
 
 class Example(DictModel):
@@ -48,12 +48,12 @@ def test_dict_model_objects_get():
 
 
 def test_dict_model_objects_raises_exception_if_no_results_are_found():
-    with pytest.raises(DictModelObjects.NoResultFound):
+    with pytest.raises(DictModelQueryset.NoResultFound):
         Example.objects.get(foo="invalid")
 
 
 def test_dict_model_objects_get_raises_exception_if_multiple_results_are_found():
-    with pytest.raises(DictModelObjects.MultipleResultsFound):
+    with pytest.raises(DictModelQueryset.MultipleResultsFound):
         Example.objects.get(foo=True)
 
 

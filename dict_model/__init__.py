@@ -10,7 +10,10 @@ def snake_case(pascal_case: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", pascal_case).lower()
 
 
-class DictModelObjects(UserList):
+class DictModelQueryset(UserList):
+    """Collection of `DictModel` objects, providing a Django ORM query-style
+    interface.
+    """
     class NoResultFound(Exception):
         pass
 
@@ -24,21 +27,21 @@ class DictModelObjects(UserList):
         obj_repr = ", ".join(
             [f"{obj.__class__.__name__}({obj.id})" for obj in self.data]
         )
-        return f"DictModelObjects([{obj_repr}])"
+        return f"DictModelQueryset([{obj_repr}])"
 
-    def all(self) -> "DictModelObjects":
-        return DictModelObjects(self.data)
+    def all(self) -> "DictModelQueryset":
+        return DictModelQueryset(self.data)
 
     def count(self, item: Optional[Any] = None) -> int:
         return len(self.data)
 
-    def exclude(self, **kwargs) -> "DictModelObjects":
-        return DictModelObjects(
+    def exclude(self, **kwargs) -> "DictModelQueryset":
+        return DictModelQueryset(
             [obj for obj in self.data if not self._check_filter(obj, **kwargs)]
         )
 
-    def filter(self, **kwargs) -> "DictModelObjects":
-        return DictModelObjects(
+    def filter(self, **kwargs) -> "DictModelQueryset":
+        return DictModelQueryset(
             [obj for obj in self.data if self._check_filter(obj, **kwargs)]
         )
 
@@ -72,6 +75,66 @@ class DictModelObjects(UserList):
 
 
 class DictModel(UserDict):
+    """Django model-like object not backed by the database.
+
+    Handy for having dropdown items in a form field that point to a set of related
+    data, without having to deal with database migrations or population.
+
+
+    from django.db import models
+    from dict_model import DictModel, dict_model
+
+    class ExampleDictModel(DictModel):
+        object_data = {
+            1: {"name": "a", "first": True},
+            2: {"name": "b", "first": False}
+        }
+
+
+    class ExampleModel(models.Model):
+        ...
+        example_dict_model_id = mdoels.IntegerField(
+            choices=ExampleDictModel.choices()
+        )
+
+        @property
+        @dict_model(ExampleDictModel)
+        def example_dict_model(self):
+            pass
+
+    >>> model = ExampleModel.objects.create(..., example_dict_model_id=2)
+    >>> model.example_dict_model
+    ExampleDictModel(id=2, example_model=ExampleModel(1), name="b", first=False)
+
+    An alternative to defining object data in a dict is to use the
+    `dict_model_object` decorator. This makes it easy to define dict model objects
+    with methods:
+
+
+    from dict_model import dict_model_object
+
+    @dict_model_object(ExampleDictModel):
+    class C:
+        name: "c"
+        first: False
+
+        def hello(self):
+            return f"My name is {self.name} and I am first: {self.first}"
+
+    >>> obj = ExampleDictModel(3)
+    >>> obj.hello()
+    'My name is c and I am first: False'
+
+
+    A Django ORM query-like interface is provided for dict models as well:
+
+
+    >>> ExampleDictModel.objects.first()
+    ExampleDictModel(id=1, related=None, name='a', first=True)
+
+    >>> ExampleDictModel.objects.get(id=2)
+    ExampleDictModel(id=2, related=None, name='b', first=False)
+    """
     class ValidationError(Exception):
         pass
 
@@ -144,7 +207,7 @@ class DictModel(UserDict):
 
     @classproperty
     def objects(cls):
-        return DictModelObjects([cls(id) for id in cls.object_data.keys()])
+        return DictModelQueryset([cls(id) for id in cls.object_data.keys()])
 
 
 def dict_model(dict_model_cls: Type[DictModel], field_name: Optional[str] = None):
