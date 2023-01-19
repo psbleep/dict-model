@@ -75,7 +75,7 @@ class DictModel(UserDict):
     class ValidationError(Exception):
         pass
 
-    validate_fields = True
+    validate_fields: bool = True
     optional_fields: List[str] = []
 
     object_data: Dict = {}
