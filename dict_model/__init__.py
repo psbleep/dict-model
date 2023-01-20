@@ -34,6 +34,8 @@ class DictModelQueryset(UserList):
         return DictModelQueryset(self.data)
 
     def count(self, item: Optional[Any] = None) -> int:
+        if item:
+            return super().count(item)
         return len(self.data)
 
     def exclude(self, **kwargs) -> "DictModelQueryset":
