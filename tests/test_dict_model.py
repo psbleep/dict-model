@@ -1,6 +1,6 @@
 import pytest
 
-from dict_model import DictModel
+from dict_model import DictModel, DictModelQueryset
 
 
 class Example(DictModel):
@@ -106,4 +106,13 @@ def test_dict_model_repr_with_related():
 
     assert repr(Child(id=3, related=ParentModel(id=7))) == (
         "Child(id=3, parent_model=ParentModel(7), name='hello')"
+    )
+
+
+def test_dict_model_objects_returns_queryset_of_all_dict_model_objects():
+    class Multiple(DictModel):
+        object_data = {1: {"name": "A"}, 2: {"name": "B"}, 3: {"name": "C"}}
+
+    assert Multiple.objects == DictModelQueryset(
+        [Multiple(1), Multiple(2), Multiple(3)]
     )
